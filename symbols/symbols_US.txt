@@ -75,6 +75,10 @@ SUB_SelectInventoryItem_Battle = C5E4C3, Same as above, but for usage in battles
 SHOPSUB_SelectWhoCarries       = C5E52E, Select who will carry the bought item
 ; TODO more stuff etc etc
 
+SUB_CancelItemDeliveries       = C64650, Cancel Escargo Express item deliveries
+
+SUB_CancelTimedEvents          = C69082, Cancel all timed events
+
 CHECK_PMemberIncapacitated     = C7DC7F, Checks if the party member in the COUNTER register is incapacitated (KO or Diamondized)
 
 SUB_KeyItemGet                 = C7DCB6, Fanfare + "([NAME] got the [ITEM])"
@@ -98,12 +102,12 @@ TEXT_AttackerPronounUpper      = C7E61D, "He/She/It" depending on attacker gende
 TEXT_DebugTargetPronoun        = C7E638, " 0 he/ 1 she/ 2 it" depending on target gender
 TEXT_PMemberPossessive         = C7E660, "his/her" depending on party member
 TEXT_AttackerPossessive        = C7E66E, "his/her/its" depending on attacker gender
-TEXT_AttackerPossessive2       = C7E689, Same as above (unused)
+TEXT_TargetPossessive          = C7E689, "his/her/its" depending on target gender
 TEXT_PMemberObjectPronoun      = C7E6A4, "him/her" depending on party member
 TEXT_PMemberPolite             = C7E6B3, "sir/ma'am" depending on party member
 TEXT_PMemberPoliteUpper        = C7E6C5, "Sir/Ma'am" depending on party member
 TEXT_PartyDescription          = C7E6D7, "[LEADER]/[LEADER] and [PMEMBER2]/[LEADER] and his/her friends"
-TEXT_PartyDescription2         = C7E74E, Same as above but doesn't clobber the textbox registers
+TEXT_PartyDescriptionNoClobber = C7E74E, Same as TEXT_PartyDescription but doesn't clobber the textbox registers
 TEXT_KidPluralize              = C7E758, "kid/kids" depending on amount of alive party members
 TEXT_PlayersName               = C7E77D, Print the player's name
 
@@ -117,4 +121,3 @@ SUB_FullHealAll                = C915F4, Full heal eveyone (HP/PP + status)
 SUB_FullHealAllWithSFX         = C9162C, Full heal everyone with sound effect
 SUB_FullHealSingle             = C91675, Full heal single party member
 SUB_SpendNight                 = C91693, Spend the night with fadeout + HP/PP heal
-
