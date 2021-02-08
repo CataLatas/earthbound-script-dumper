@@ -130,8 +130,17 @@ class ScriptDumper(object):
             self.dictionary.append(''.join(chars))
 
     def resolve_labels(self):
-        script_blocks = SCRIPT_BLOCKS_PER_VERSION[self.version]
+        # wtf very hacky
+        npc_config_addr = 0x0F89C1 if self.version == RomVersion.JP else 0x0F8985
+        self.rom_file.seek(npc_config_addr + 9)  # sizeof == 17, offsetof(text_ptr) == 9
+        for npc in range(constants.NPC_COUNT):
+            text_ptr = self.read_int(3)
+            if text_ptr != 0:
+                self.add_new_label(text_ptr, 'Npc{:04d}'.format(npc))
 
+            self.rom_file.seek(17-3, os.SEEK_CUR)
+
+        script_blocks = SCRIPT_BLOCKS_PER_VERSION[self.version]
         for start, size in script_blocks:
             end = start + size + self.header_offset
             self.rom_file.seek(start + self.header_offset)
@@ -147,11 +156,14 @@ class ScriptDumper(object):
                 elif c < 0x20:
                     self.get_script_code_string(c)  # Consume bytes that make up this script code
 
-    def add_new_label(self, addr):
+    def add_new_label(self, addr, label=None):
         self.should_add_label = False
 
+        if label is None:
+            label = 'L_{:06X}'.format(addr)
+
         if addr not in self.symbols:
-            self.symbols[addr] = Symbol('L_{:06X}'.format(addr))
+            self.symbols[addr] = Symbol(label)
 
     def get_script_code_string(self, sc):
         '''Warning: very unreadable code!!'''
@@ -574,7 +586,17 @@ if __name__ == '__main__':
         header_offset = rom_size % 0x010000
         rom_file = open(sys.argv[1], 'rb')
         version = get_rom_version(rom_file, rom_size, header_offset)
-        print('Detected ROM Version: {}'.format(version))
+        print('Detected ROM Version: {}\n'.format(version))
+
+        if os.path.isdir(sys.argv[2]):
+            sys.exit('{} is a directory. Exiting...'.format(sys.argv[2]))
+        elif os.path.isfile(sys.argv[2]):
+            # There have been cases where I accidentally overwrote the symbols file. Whoops!
+            option = input('{} already exists. Overwrite? [y/N] '.format(sys.argv[2]))
+            if option.lower() != 'y':
+                sys.exit('Operation cancelled. Exiting...')
+
+            print('')  # Blank line for extra output niceness
 
         out_file = open(sys.argv[2], 'w')
 

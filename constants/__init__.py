@@ -11,3 +11,4 @@ from .stats import *
 from .status import *
 
 GET_DIR_FROM_TYPES = ('PMEMBER', 'NPC', 'OBJ')
+NPC_COUNT = 1407
