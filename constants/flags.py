@@ -127,7 +127,7 @@ FLAG_NAMES = {
     123: 'BLUE_COW_ALT_TEXT',
     124: 'ZOMBIE_PAPER_ON_TENT',
     125: 'ZOMBIES_ON_TENT_FLOOR',
-    # 126 (Something about the Shyness Book)
+    126: 'LEARNED_ABOUT_SHYNESS_BOOK',  # TODO: Maybe "can search for shyness book"? This flag is set even if you don't talk to Apple Kid
     127: 'TALKED_TO_ANDONUTS_1',
     128: 'JEFF_STARTS_HIS_JOURNEY',
     129: 'TESSIE_EMERGES',
@@ -153,7 +153,7 @@ FLAG_NAMES = {
     149: 'POO_STARTS_HIS_JOURNEY',
     # 150 (Related to Poo's journey)
     151: 'QUEST_TO_SUBMARINE',
-    # 152 (Related to Pyramid Dance)
+    152: 'PYRAMID_DANCE_IN_PROGRESS',
     153: 'TENDA_VILLAGE_UNDERGROUND_OPEN',
     154: 'TALKED_TO_TENDA_CHIEF',
     155: 'TENDAS_NOT_SHY',
@@ -222,11 +222,11 @@ FLAG_NAMES = {
     218: 'VISITED_DEEP_DARKNESS',
     219: 'VISITED_TENDA_VILLAGE',
     220: 'VISITED_UNDERWORLD',
-    # 221 (Unknown Brain Food Lunch inside a present)
-    # 222 (Unknown Refreshing Herb inside a present)
+    221: 'UNUSED_BRAIN_FOOD_LUNCH',
+    222: 'UNUSED_REFRESHING_HERB',
     223: 'GOT_PHASE_DISTORTER_HORN_OF_LIFE',
-    # 224 (Shop-related)
-    # 225 (Shop-related)
+    224: 'SHOP_SOLD_OLD_EQUIPMENT',
+    225: 'SHOP_SOLD_ITEM',
     # 226 (I hate multipurpose flags)
     # 227 (I hate multipurpose flags)
     # 228 (I hate multipurpose flags)
@@ -314,15 +314,15 @@ FLAG_NAMES = {
     310: 'POKEY_WAITING_AT_COUCH',
     311: 'WINTERS_ROPE_LOWERED',
     312: 'GHOSTS_BLOCKING_THREED',
-    # 313 (Data Crystal suggest this is the Dept. Store Spook flag. I couldn't confirm this however)
+    # 313 (Unknown. Something about the City Bus?)
     # 314 (Unknown. Something about the Runaway Five Bus?)
     315: 'GHOSTS_BLOCKING_TWOSON',
-    # 316 (???)
+    # 316 (Unknown. Something about the City Bus?)
     317: 'RUNAWAY_BUS_FROM_FOURSIDE_TO_THREED',
     318: 'RUNAWAY_FIVE_AT_CLUMSY_ROBOT_ROOM',
     319: 'WATCHED_RUNAWAY_FIVE_AT_CHAOS_THEATER',
     # 320 (???)
-    # 321 (??? Something about Paula's Happy-Happy kidnapping)
+    # 321 (Something about Paula's Dad acknowledging the kidnapping)
     322: 'PAULAS_DAD_NOTICED_SHES_NOT_HOME',
     323: 'GOT_PAK_OF_BUBBLE_GUM',
     324: 'SHOP_RED_SNAKE',
@@ -374,7 +374,7 @@ FLAG_NAMES = {
     # 370 (Unknown. Related to traffic jam?)
     # 371 (???)
     372: 'PARTY_IS_ROBOTIFIED',
-    # 373 (???)
+    # 373 (Unknown. Related to Boogey Tent)
     374: 'TOPOLLA_THEATER_BACKSTAGE_UNBLOCKED',
     375: 'PEOPLE_IN_ONETT',
     # 376 (Unknown. Set after Apple Kid calls you about the Gourmet Yogurt Machine)
@@ -387,27 +387,27 @@ FLAG_NAMES = {
     383: 'JUST_RESTED',
     384: 'GOT_ALL_MELODIES',
     385: 'GOT_CONTACT_LENS',
-    # 386 (???)
+    386: 'MOONSIDE_ENRAGED_FIRE_PLUG_DEFEATED',  # Unused, there's no NPC attached to the script for this battle
     387: 'MOONSIDE_CAFE_ROBO_PUMP_DEFEATED',
     388: 'MOONSIDE_MUSEUM_ROBO_PUMP_DEFEATED',
     389: 'MOONSIDE_HOSPITAL_ABSTRACT_ART_DEFEATED',
-    # 390 (???)
-    # 391 (???)
-    392: 'GUARDIAN_HIEROGLYPH_1_DEFEATED',
-    393: 'GUARDIAN_HIEROGLYPH_2_DEFEATED',
-    394: 'GUARDIAN_HIEROGLYPH_3_DEFEATED',
-    395: 'GUARDIAN_HIEROGLYPH_4_DEFEATED',
-    396: 'GUARDIAN_HIEROGLYPH_5_DEFEATED',
-    397: 'GUARDIAN_HIEROGLYPH_6_DEFEATED',
-    398: 'GUARDIAN_HIEROGLYPH_7_DEFEATED',
-    399: 'GUARDIAN_HIEROGLYPH_8_DEFEATED',
-    400: 'GUARDIAN_HIEROGLYPH_9_DEFEATED',
-    401: 'GUARDIAN_HIEROGLYPH_10_DEFEATED',
-    402: 'GUARDIAN_HIEROGLYPH_11_DEFEATED',
-    403: 'GUARDIAN_HIEROGLYPH_12_DEFEATED',
-    404: 'GUARDIAN_HIEROGLYPH_13_DEFEATED',
-    405: 'GUARDIAN_HIEROGLYPH_14_DEFEATED',
-    406: 'GUARDIAN_HIEROGLYPH_15_DEFEATED',
+    390: 'GUARDIAN_HIEROGLYPH_1_DEFEATED',  # The first Hieroglyph Guardian doesn't reference this flag and never fights you
+    391: 'GUARDIAN_HIEROGLYPH_2_DEFEATED',  # The second Hieroglyph Guardian doesn't reference this flag and never fights you
+    392: 'GUARDIAN_HIEROGLYPH_3_DEFEATED',
+    393: 'GUARDIAN_HIEROGLYPH_4_DEFEATED',
+    394: 'GUARDIAN_HIEROGLYPH_5_DEFEATED',
+    395: 'GUARDIAN_HIEROGLYPH_6_DEFEATED',
+    396: 'GUARDIAN_HIEROGLYPH_7_DEFEATED',
+    397: 'GUARDIAN_HIEROGLYPH_8_DEFEATED',
+    398: 'GUARDIAN_HIEROGLYPH_9_DEFEATED',
+    399: 'GUARDIAN_HIEROGLYPH_10_DEFEATED',
+    400: 'GUARDIAN_HIEROGLYPH_11_DEFEATED',
+    401: 'GUARDIAN_HIEROGLYPH_12_DEFEATED',
+    402: 'GUARDIAN_HIEROGLYPH_13_DEFEATED',
+    403: 'GUARDIAN_HIEROGLYPH_14_DEFEATED',
+    404: 'GUARDIAN_HIEROGLYPH_15_DEFEATED',
+    405: 'GUARDIAN_HIEROGLYPH_16_DEFEATED',
+    406: 'GUARDIAN_HIEROGLYPH_17_DEFEATED',
     407: 'LETHAL_ASP_HIEROGLYPH_1_DEFEATED',
     408: 'LETHAL_ASP_HIEROGLYPH_2_DEFEATED',
     409: 'LETHAL_ASP_HIEROGLYPH_3_DEFEATED',
@@ -436,7 +436,7 @@ FLAG_NAMES = {
     432: 'DEBUG_SKIP_SANDWICH_DX',
     433: 'ZOMBIE_CHICK_HOTEL_MUSIC',
     434: 'STARMAN_DX_ABSENT',  # (Another flag for Starman DX defeated. One of them might be responsible only for palette changes, maybe)
-    # 435 (Guardian General defeated?)
+    435: 'GUARDIAN_GENERAL_DEFEATED',
     436: 'SEA_OF_EDEN_KRAKEN_1_DEFEATED',
     437: 'SEA_OF_EDEN_KRAKEN_2_DEFEATED',
     438: 'SEA_OF_EDEN_KRAKEN_3_DEFEATED',
@@ -602,13 +602,14 @@ FLAG_NAMES = {
     598: 'SHOP_SCARABA_WATER',
     599: 'SHOP_SOUTH_SCARABA_VARIETY',
     600: 'SHOP_DEEP_DARKNESS_BUSINESSMAN',
-
+    601: 'SHATTERED_MAN_1_DEFEATED',
+    602: 'SHATTERED_MAN_2_DEFEATED',
     603: 'MINI_BARF_DEFEATED',
     604: 'GOT_KEY_TO_THE_LOCKER',
     605: 'USED_KEY_TO_THE_LOCKER',
     606: 'DUNGEON_MAN_OPEN',
     # 607 (Unknown. Related to desert mine?)
-    # 608 (Unknown. Related to desert mine?)
+    608: 'DESERT_MINE_TO_EXPAND_NEXT_NIGHT',
     609: 'WINTERS_PENCIL_ERASED',
     610: 'DETECTIVE_IN_THREED',
     # 611 (Something about talking to Paula's dad and not talking to Everdred)
@@ -625,10 +626,10 @@ FLAG_NAMES = {
     622: 'BUBBLE_MONKEYS_WIFE_AT_WINTERS',
     623: 'PUNK_GUY_OUTSIDE_HIS_HOUSE_THREED',
     624: 'EVERDRED_AT_HIS_HOUSE',
-    # 625 (Something about "Fancy Pokey" in the Monotoli Building)
+    # 625 (Something about "Fancy Pokey" in the Monotoli Building) -- Got kicked out of Pokey's Room in the Monotoli Building?
     626: 'MEN_ABOUT_TO_ENTER_CIRCUS_TENT',
     627: 'TRACY_HAS_SOUND_STONE',
-    # 628 (Something about not rendering Jeff at Saturn Valley during the epilogue)
+    628: 'PRESENTS_AT_SATURN_VALLEY',
     629: 'PARTY_IS_DIRTY_FROM_BELCH_FIGHT',
     630: 'BUBBLE_MONKEY_AT_LAKE_TESS',
     631: 'TALKED_TO_MOONSIDE_MONOTOLI',
@@ -747,7 +748,7 @@ FLAG_NAMES = {
     744: 'TALKED_TO_CARPAINTER',
     745: 'QUEST_TO_YOGURT_MACHINE',
     746: 'SCAM_HOUSE_UNLOCKED',
-    # 747 (???)
+    # 747 (??? Something about Runaway Five Tour Bus???)
     748: 'SKY_RUNNER_AT_WINTERS_LAB',
     749: 'NESS_WEARING_PAJAMAS',
     750: 'LEFT_HOME_AT_LEAST_ONCE',
@@ -759,7 +760,7 @@ FLAG_NAMES = {
     756: 'DUNGEON_MAN_IN_PARTY',
     757: 'GEORGE_HAS_DIAMOND',
     758: 'GOING_TO_MAGICANT_MUSIC',
-    # 759 (Visibility flag for NPCs #851 and #852 [who are those NPCs??])
+    759: 'VENUS_AND_RUNAWAY_FANS_AT_TOPOLLA',  # Visibility flag for NPCs #851 and #852
     760: 'PHASE_DISTORTER_MUSIC',
     # 761 (Unknown. Set when arriving in Threed, cleared when defeating Belch)
     762: 'DUNGEON_MAN_GOODBYE_EXIT_SIGN',
@@ -773,7 +774,7 @@ FLAG_NAMES = {
     770: 'LAST_ESCARGO_EXPRESS_CALL',
     # 771 (???)
     772: 'LAST_DAD_CALL',
-    # 773 (Unknown. Visibility flags for people of the Threed Tent [who and where?])
+    773: 'NERDY_GUY_AND_FAT_GUY_AT_CIRCUS_TENT',  # Visibility flags for NPCs #457 and #459
     774: 'TALKED_TO_MOONSIDE_SAILOR_MAN',
     # 775 (Can't get calls from Dad?)
     776: 'PAULA_AT_MONOTOLI_BUILDING',
