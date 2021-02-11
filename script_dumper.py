@@ -20,7 +20,7 @@ SCRIPT_BLOCKS_PER_VERSION = {
     RomVersion.JP: constants.SCRIPT_BLOCKS_JP
 }
 
-Symbol = namedtuple('Symbol', 'label comment', defaults=[None])
+Symbol = namedtuple('Symbol', 'label comment')
 
 class ScriptDumper(object):
     def __init__(self, rom_file, out_file, version, symbols, header_offset):
@@ -173,7 +173,7 @@ class ScriptDumper(object):
             label = 'L_{:06X}'.format(addr)
 
         if addr not in self.symbols:
-            self.symbols[addr] = Symbol(label)
+            self.symbols[addr] = Symbol(label, None)
 
     def get_script_code_string(self, sc):
         '''Warning: very unreadable code!!'''
