@@ -1,1 +1,85 @@
-DUMMY = FFFFFF
+SHOPSUB_DisplayShop            = C60360, Displays the actual shop menu after selecting the "Buy" option
+SHOPSUB_KaChing                = C605EA, Play the "Ka-Ching" sound effect
+SHOPSUB_KaChing_Alt            = C605F5, Alternative "Ka-Ching" sound
+
+SHOPTEXT_Greeting              = C605F9, When the player first interacts with a shop owner
+SHOPTEXT_ExitThank             = C60791, When the player leaves the shop after buying/selling something
+SHOPTEXT_ExitNoBuy             = C60929, When the player leaves the shop without buying/selling anything
+SHOPTEXT_SelectBuy             = C60AC1, When the player selects the "Buy" option
+SHOPTEXT_TellItemName          = C60C59, Tell the player the name of the item they're buying
+SHOPTEXT_WhoWillCarry          = C60DF1, Ask who will carry the item the player is buying
+SHOPTEXT_AskEquipItem          = C60F89, Ask if the player wants to equip the item they bought
+SHOPTEXT_AskSellOldEquip       = C6106B, Ask if the player wants to sell their previously equipped item
+SHOPTEXT_CannotEquip           = C6114D, Ask if the player is certain they want to buy an item they can't equip
+SHOPTEXT_CancelBuy             = C6122F, When the player decides to not buy an item
+SHOPTEXT_NotEnoughMoney        = C613C7, When the player doesn't have enough money to buy an item
+SHOPTEXT_CannotCarry           = C6155F, When the player can't carry the item they want to buy. The shop owner will ask if the player wants to sell something
+SHOPTEXT_SelectSell            = C616F7, When the player selects the "Sell" option
+SHOPTEXT_TellSellPrice         = C617D9, Tell the player the price of the item they're selling
+SHOPTEXT_CancelSell            = C618BB, When the player decides to not sell an item
+SHOPTEXT_NoItemToSell          = C6199D, When the player has nothing at all to sell
+SHOPTEXT_CannotSell            = C61A7F, When the player tries to sell a key item
+SHOPTEXT_ThankYou              = C61B61, When the player buys or sells an item to the shop owner
+SHOPTEXT_AnythingElse          = C61CF9, Ask if the player wants to buy/sell something else
+SHOPTEXT_SOMETHING             = C61E91, When the player is presented the "Buy"/"Sell" option again (don't know what to call this one!)
+SHOPTEXT_SomeoneElseCarry      = C61F73, When the player selects a character that has a full inventory as the person who will carry the bought item
+
+FORSALE_Greeting               = C65300, When the For Sale Sign customer arrives
+FORSALE_ExitThank              = C6531F, When the For Sale Sign customer leaves after buying an item
+FORSALE_ExitNoSell             = C6533E, When the For Sale Sign customer leaves without buying anything
+FORSALE_TellSellPrice          = C6535D
+FORSALE_CancelSell             = C6537C
+FORSALE_CannotSell             = C6539B
+
+FORSALE_CannotFindPlayer       = C656FD, When the For Sale Sign customer gives up from not being able to pathfind to the player
+SHOPLOOP_BuyOrSell             = C657BE, Main loop for shops that allow you to buy and sell items
+SHOPLOOP_Buy                   = C658A9, Main loop for shops that allow you only to buy items
+SHOPLOOP_BuySingle             = C65929, Main loop for shops that allow you only to buy single items
+SHOPSUB_HandleItemBuy          = C659A5, Subroutine for handling item buying
+SHOPSUB_HandleItemSell         = C65AEB, Subroutine for handling item selling
+
+SHOPSUB_CheckMoney             = C65B49, Check if the player has enough money to buy what they selected
+SHOPSUB_SetBoughtWeaponFlag    = C65B59, Sets the "BOUGHT_WEAPON" flag if the item being bought is a weapon
+SHOPSUB_GiveAndCheckIfCanEquip = C65B68, Give the bought item to the player and check if it can be equipped
+
+SHOPSUB_GiveItemAndRemoveMoney = C65CA9, Give the bought item to the player and subtract its price from their wallet
+SHOPSUB_RandomizeSandwich      = C65CC0, Randomize the Lucky Sandwich the player is buying
+
+CHECK_AnyoneHasItem            = C65D35, Returns FALSE if every inventory is empty
+SUB_SelectInventoryItem        = C65D5A, Opens the inventory window for item selection. Returns FALSE if no item selected
+SUB_SelectInventoryItem_Battle = C65DC7, Same as above, but for usage in battles (e.g "Do you want to throw something away?")
+SHOPSUB_SelectWhoCarries       = C65E32, Select who will carry the bought item
+
+SUB_RestFadeOut                = C78DD3, "Take a rest" fadeout
+SUB_RecoverHPPP                = C7BDF8, Recover HP/PP, incapacitated characters are not affected
+SUB_ExpandDesertMineIfNeeded   = C7BE3D, Expand the mine in Dusty Dunes Desert, if needed
+SUB_FanfareTakeARest           = C7BE4C, "Take a rest" fanfare (don't know what to call this really)
+SUB_FullHealAllRest            = C7BE57, "Take a rest" + full heal everyone
+SUB_FullHealAll                = C7BE6A, Full heal eveyone (HP/PP + status)
+SUB_FullHealAllWithSFX         = C7BE9C, Full heal everyone with sound effect
+SUB_FullHealSingle             = C7BEE5, Full heal single party member
+SUB_SpendNight                 = C7BF03, Spend the night with fadeout + HP/PP heal
+
+SUB_CancelItemDeliveries       = C7A573, Cancel Escargo Express item deliveries
+
+DEBUGSUB_FillInventory         = C7C9E6, Debug subroutine for filling the inventory with Skip Sandwiches
+DEBUGSUB_FillInventory_Exit    = C7C9F8, "Return" statement for the subroutine
+
+SUB_CancelTimedEvents          = C91052, Cancel all timed events
+
+CHECK_PMemberIncapacitated     = C93A3E, Checks if the party member in the COUNTER register is incapacitated (KO or Diamondized)
+
+SUB_KeyItemGet                 = C93A75, Fanfare + "([NAME] got the [ITEM])"
+SUB_ItemGet                    = C93A8E, Sound effect + "([NAME] got the [ITEM])"
+TEXT_ItemGet                   = C93A99, "([NAME] got the [ITEM])"
+SUB_GetUsedItem                = C93AF2
+TEXT_ItemUsed                  = C93AFD
+MENU_MakeYesNoWithHPBox        = C93B13
+MENU_MakeYesNoWithWallet       = C93B15
+MENU_MakeYesNo                 = C93B17
+MENU_HandleYesNo               = C93B26
+MUSIC_SlowFadeOut              = C93B33
+MUSIC_FastFadeOut              = C93B3C
+MUSIC_SlowFadeRestore          = C93B45
+MUSIC_FastFadeRestore          = C93B4D
+CHECK_TimedEventPending        = C93B55, Returns TRUE if any timed event is pending completion

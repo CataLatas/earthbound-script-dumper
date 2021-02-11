@@ -61,10 +61,28 @@ SHOPLOOP_BuyOrSell             = C5DECB, Main loop for shops that allow you to b
 SHOPLOOP_Buy                   = C5DFB1, Main loop for shops that allow you only to buy items
 SHOPLOOP_BuySingle             = C5E02F, Main loop for shops that allow you only to buy single items
 SHOPSUB_HandleItemBuy          = C5E0A9, Subroutine for handling item buying
+SHOPSUB_WhoWillCarry           = C5E0CC
+
+SHOPSUB_EquipBoughtItem        = C5E136
+SHOPSUB_SellOldEquip           = C5E17E
+
+SHOPSUB_HandleItemBuy_END      = C5E18B
+SHOPSUB_ConfirmBuyCannotEquip  = C5E18F
+SHOPSUB_CancelBuy              = C5E1AD
+SHOPSUB_FullInventory          = C5E1B7
+SHOPSUB_NotEnoughMoney         = C5E1D6
+SHOPSUB_ConfirmedBuy           = C5E1E0, Player bought the item for real
+
+SHOPSUB_HandleItemSell         = C5E1EF, Subroutine for handling item selling
 
 SHOPSUB_CheckMoney             = C5E24B, Check if the player has enough money to buy what they selected
 SHOPSUB_SetBoughtWeaponFlag    = C5E25B, Sets the "BOUGHT_WEAPON" flag if the item being bought is a weapon
 SHOPSUB_GiveAndCheckIfCanEquip = C5E26A, Give the bought item to the player and check if it can be equipped
+SHOPSUB_ShowOldStat            = C5E277, Shows the numeric value of the old stat (defense or offense) before equipping the shop item
+SHOPSUB_ShowNewStat            = C5E2F7, "to " + numeric value of new stat (defense or offense) after equipping the shop item
+
+SHOPSUB_GetOldEquipSellPrice   = C5E36E, Gets the sell price of the old equipment after equipping a new item at the shop
+SHOPSUB_GiveMoneyFromOldEquip  = C5E37A
 
 SHOPSUB_GiveItemAndRemoveMoney = C5E3A5, Give the bought item to the player and subtract its price from their wallet
 SHOPSUB_RandomizeSandwich      = C5E3BC, Randomize the Lucky Sandwich the player is buying
@@ -74,6 +92,10 @@ SUB_SelectInventoryItem        = C5E456, Opens the inventory window for item sel
 SUB_SelectInventoryItem_Battle = C5E4C3, Same as above, but for usage in battles (e.g "Do you want to throw something away?")
 SHOPSUB_SelectWhoCarries       = C5E52E, Select who will carry the bought item
 ; TODO more stuff etc etc
+
+SUB_CancelItemDeliveries       = C64650, Cancel Escargo Express item deliveries
+
+SUB_CancelTimedEvents          = C69082, Cancel all timed events
 
 CHECK_PMemberIncapacitated     = C7DC7F, Checks if the party member in the COUNTER register is incapacitated (KO or Diamondized)
 
@@ -98,12 +120,12 @@ TEXT_AttackerPronounUpper      = C7E61D, "He/She/It" depending on attacker gende
 TEXT_DebugTargetPronoun        = C7E638, " 0 he/ 1 she/ 2 it" depending on target gender
 TEXT_PMemberPossessive         = C7E660, "his/her" depending on party member
 TEXT_AttackerPossessive        = C7E66E, "his/her/its" depending on attacker gender
-TEXT_AttackerPossessive2       = C7E689, Same as above (unused)
+TEXT_TargetPossessive          = C7E689, "his/her/its" depending on target gender
 TEXT_PMemberObjectPronoun      = C7E6A4, "him/her" depending on party member
 TEXT_PMemberPolite             = C7E6B3, "sir/ma'am" depending on party member
 TEXT_PMemberPoliteUpper        = C7E6C5, "Sir/Ma'am" depending on party member
 TEXT_PartyDescription          = C7E6D7, "[LEADER]/[LEADER] and [PMEMBER2]/[LEADER] and his/her friends"
-TEXT_PartyDescription2         = C7E74E, Same as above but doesn't clobber the textbox registers
+TEXT_PartyDescriptionNoClobber = C7E74E, Same as TEXT_PartyDescription but doesn't clobber the textbox registers
 TEXT_KidPluralize              = C7E758, "kid/kids" depending on amount of alive party members
 TEXT_PlayersName               = C7E77D, Print the player's name
 
@@ -117,4 +139,3 @@ SUB_FullHealAll                = C915F4, Full heal eveyone (HP/PP + status)
 SUB_FullHealAllWithSFX         = C9162C, Full heal everyone with sound effect
 SUB_FullHealSingle             = C91675, Full heal single party member
 SUB_SpendNight                 = C91693, Spend the night with fadeout + HP/PP heal
-

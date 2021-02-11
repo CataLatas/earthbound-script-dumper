@@ -30,6 +30,8 @@ class ScriptDumper(object):
         self.header_offset = header_offset
         self.dictionary = []  # Populated on "build_dictionary", but only if RomVersion is not JP
         self.translate_chr = m2_chr if version == RomVersion.JP else eb_chr
+        self.inside_string = False
+        self.was_linebreak = False
         self.should_add_label = False
         self.symbols = symbols
 
@@ -45,6 +47,10 @@ class ScriptDumper(object):
         bytes_ = self.rom_file.read(size)
         return int.from_bytes(bytes_, byteorder='little', signed=signed)
 
+    def peek_int(self, size, signed=False):
+        bytes_ = self.rom_file.peek(size)
+        return int.from_bytes(bytes_[:size], byteorder='little', signed=signed)
+
     def read_address(self):
         addr = self.read_int(4)
 
@@ -55,7 +61,7 @@ class ScriptDumper(object):
 
     def read_flag(self):
         flag_id = self.read_int(2)
-        return constants.FLAG_NAMES.get(flag_id, flag_id)
+        return constants.FLAG_NAMES.get(flag_id, 'flag {}'.format(flag_id))
 
     def read_stat(self):
         stat_id = self.read_int(1)
@@ -104,13 +110,17 @@ class ScriptDumper(object):
         type_ = list_get_default(constants.GET_DIR_FROM_TYPES, type_id-1, type_id)
 
         if type_id == 1:
-            value = self.read_party_member(replace_00='REG_RESULT', replace_FF='LEADER')
+            value = self.read_party_member(replace_00='result', replace_FF='leader')
             self.read_int(1)  # This byte is ignored since a party member is a 1-byte value, but 2 bytes are always read to compensate for the NPC/OBJ case
         else:
             # Types 2 and 3 are NPC and OBJ, which don't really have constants
             value = self.read_int(2)
 
         return (type_, value)
+
+    def read_register(self):
+        reg_id = self.read_int(1)
+        return list_get_default(constants.REGISTERS, reg_id, reg_id)
 
     def build_dictionary(self):
         dict_ptrs = 0x08CDED if self.version == RomVersion.US else 0x05F2C3
@@ -169,8 +179,8 @@ class ScriptDumper(object):
         '''Warning: very unreadable code!!'''
 
         args = []
-        sc_name = constants.SC_NAMES.get(sc, 'UNK_{:02X}'.format(sc))
-        line_break = sc in {0x00, 0x01, 0x04, 0x05, 0x06, 0x08, 0x09, 0x0E, 0x0F, 0x11, 0x12, 0x1A, 0x1B, 0x1E}
+        sc_name = constants.SC_NAMES.get(sc, 'unk_{:02X}'.format(sc))
+        line_break = sc not in {0x0F, 0x10}
 
         if sc in {0x04, 0x05, 0x07}:
             args.append(self.read_flag())
@@ -178,18 +188,25 @@ class ScriptDumper(object):
             args.append(self.read_address())
         elif sc in {0x0B, 0x0C, 0x0E, 0x10}:
             args.append(self.read_int(1))
+        elif sc == 0x03:  # prompt2
+            if self.peek_int(1) == 0x00:  # linebreak
+                self.read_int(1)  # Consume linebreak
+                sc_name = 'next'
+        elif sc == 0x13:  # wait
+            if self.peek_int(1) == 0x02:  # eob
+                self.read_int(1)  # Consume eob
+                sc_name = 'end'
         elif sc == 0x0D:
-            sc_name = 'RESULT_TO_ARG' if self.read_int(1) == 0 else 'COUNTER_TO_ARG'
+            sc_name = 'rtoarg' if self.read_int(1) == 0 else 'ctoarg'
         elif sc == 0x06:
             args.append(self.read_flag())
             args.append(self.read_address())
         elif sc == 0x09:
             count = self.read_int(1)
-            args += [self.read_address() for i in range(count)]
+            args += [self.read_address() for _ in range(count)]
         elif sc == 0x18:
             sub_sc = self.read_int(1)
-            sc_name = constants.SC_18_NAMES.get(sub_sc, 'UNK_18_{:02X}'.format(sub_sc))
-            line_break = sub_sc != 0x07
+            sc_name = constants.SC_18_NAMES.get(sub_sc, 'unk_18_{:02X}'.format(sub_sc))
 
             if sub_sc in {0x01, 0x03, 0x08, 0x09}:
                 args.append(self.read_int(1))
@@ -197,15 +214,15 @@ class ScriptDumper(object):
                 args.append(self.read_int(1))
                 args.append(self.read_int(1))
             elif sub_sc == 0x07:
-                args.append(self.read_int(4))
-                args.append(self.read_int(1))
+                value = self.read_int(4)
+                args.append(self.read_register())
+                args.append(value)
             elif sub_sc == 0x0D:
-                args.append(self.read_chosen_four(replace_00='REG_RESULT'))
+                args.append(self.read_chosen_four(replace_00='result'))
                 args.append(self.read_int(1))
         elif sc == 0x19:
             sub_sc = self.read_int(1)
-            sc_name = constants.SC_19_NAMES.get(sub_sc, 'UNK_19_{:02X}'.format(sub_sc))
-            line_break = sub_sc in {0x02, 0x04, 0x05, 0x1B, 0x1C, 0x26}
+            sc_name = constants.SC_19_NAMES.get(sub_sc, 'unk_19_{:02X}'.format(sub_sc))
 
             if sub_sc == 0x02:
                 chars = [self.translate_chr(self.read_int(1))]  # This is accurate to the game implementation. It's impossible to have an empty string
@@ -217,9 +234,10 @@ class ScriptDumper(object):
 
                 args.append('"{}"'.format(''.join(chars)))
                 if c == 0x01:  # 0x01 = end and run another script
+                    sc_name = 'add_option_with_callback'
                     args.append(self.read_address())
             elif sub_sc == 0x22:
-                args.append(self.read_party_member(replace_00='REG_ARGUMENT', replace_FF='LEADER'))
+                args.append(self.read_party_member(replace_00='argument', replace_FF='leader'))
                 args += self.read_type_and_obj()
             elif sub_sc == 0x23:
                 args.append(self.read_int(2))  # NPC ID
@@ -228,7 +246,7 @@ class ScriptDumper(object):
                 args.append(self.read_int(2))  # OBJ TYPE
                 args += self.read_type_and_obj()
             elif sub_sc == 0x05:
-                args.append(self.read_party_member(replace_00='REG_RESULT'))
+                args.append(self.read_party_member(replace_00='result'))
                 args += self.read_status()
             elif sub_sc == 0x16:
                 args.append(self.read_int(1))
@@ -236,9 +254,9 @@ class ScriptDumper(object):
                 group = list_get_default(constants.STATUS_GROUPS, group_id-1, group_id)
                 args.append(group)
             elif sub_sc in {0x11, 0x18}:
-                args.append(self.read_chosen_four(replace_00='REG_ARGUMENT'))
+                args.append(self.read_chosen_four(replace_00='argument'))
             elif sub_sc == 0x19:
-                args.append(self.read_chosen_four(replace_00='REG_RESULT'))
+                args.append(self.read_chosen_four(replace_00='result'))
                 args.append(self.read_int(1))
             elif sub_sc in {0x1C, 0x1D}:
                 args.append(self.read_int(1))
@@ -249,7 +267,7 @@ class ScriptDumper(object):
                 args.append(self.read_stat())
         elif sc == 0x1A:
             sub_sc = self.read_int(1)
-            sc_name = constants.SC_1A_NAMES.get(sub_sc, 'UNK_1A_{:02X}'.format(sub_sc))
+            sc_name = constants.SC_1A_NAMES.get(sub_sc, 'unk_1A_{:02X}'.format(sub_sc))
 
             if sub_sc in {0x00, 0x01}:
                 args.append(self.read_address())
@@ -259,33 +277,39 @@ class ScriptDumper(object):
                 args.append(self.read_int(1))
             elif sub_sc == 0x05:
                 args.append(self.read_int(1))
-                args.append(self.read_chosen_four(replace_00='REG_ARGUMENT'))
+                args.append(self.read_chosen_four(replace_00='argument'))
             elif sub_sc == 0x06:
                 args.append(self.read_int(1))
         elif sc == 0x1B:
             sub_sc = self.read_int(1)
-            sc_name = constants.SC_1B_NAMES.get(sub_sc, 'UNK_1B_{:02X}'.format(sub_sc))
+            sc_name = constants.SC_1B_NAMES.get(sub_sc, 'unk_1B_{:02X}'.format(sub_sc))
 
             if sub_sc in {0x02, 0x03}:
                 args.append(self.read_address())
         elif sc == 0x1C:
             sub_sc = self.read_int(1)
-            sc_name = constants.SC_1C_NAMES.get(sub_sc, 'UNK_1C_{:02X}'.format(sub_sc))
-            line_break = sub_sc in {0x00, 0x04, 0x07, 0x09, 0x0C, 0x13}
+            sc_name = constants.SC_1C_NAMES.get(sub_sc, 'unk_1C_{:02X}'.format(sub_sc))
+            line_break = sub_sc not in {0x01, 0x02, 0x03, 0x05, 0x06, 0x0A, 0x0B, 0x0D, 0x0E, 0x0F, 0x12}
 
             if sub_sc == 0x11:
                 if self.version == RomVersion.US:
-                    sc_name = 'DO_WORDWRAP'
+                    sc_name = 'do_wordwrap'
                     c = self.read_int(1)
                     if c != 0:
                         c = self.translate_chr(c)  # If not reading the character from memory, translate to literal
 
                     args.append(c)
                 else:  # RomVersion.US_PROTO seems to share the same code as RomVersion.JP. It also never uses this script code, so whatever.
-                    sc_name = 'PARTY_DESCRIPTION'
+                    sc_name = 'party_description'
             elif sub_sc in {0x00, 0x03, 0x06, 0x07, 0x09, 0x0C, 0x12}:
                 args.append(self.read_int(1))
-            elif sub_sc in {0x0A, 0x0B}:
+            elif sub_sc == 0x0A:
+                arg = self.read_int(4)
+                if arg == 0:
+                    arg = 'argument'
+
+                args.append(arg)
+            elif sub_sc == 0x0B:
                 args.append(self.read_int(4))
             elif sub_sc == 0x13:
                 args.append(self.read_int(1))
@@ -293,25 +317,25 @@ class ScriptDumper(object):
             elif sub_sc == 0x01:
                 args.append(self.read_stat())
             elif sub_sc == 0x02:
-                args.append(self.read_party_member(replace_00='REG_ARGUMENT', replace_FF='LOCAL_RESULT_BAK'))
+                args.append(self.read_party_member(replace_00='argument', replace_FF='stored_result'))
             elif sub_sc == 0x05:
                 args.append(self.read_item())
             elif sub_sc == 0x08:
                 arg = self.read_int(1)
                 if arg == 1:
-                    sc_name = 'PRINT_SMASH'
+                    sc_name = 'smash'
                 elif arg == 2:
-                    sc_name = 'PRINT_YOU_WON'
+                    sc_name = 'youwon'
                 else:
-                    sc_name = '1C_08_INVALID'
+                    sc_name = 'invalid_1C_08'
+                    args.append(arg)
                     print('Invalid argument in to script code [1C 08]: {}. Should be either 1 or 2'.format(arg))
             elif sub_sc in {0x14, 0x15}:
-                prefix = 'GET_ATTACKER_' if sub_sc == 0x14 else 'GET_TARGET_'
-                sc_name = prefix + 'GENDER' if self.read_int(1) == 1 else prefix + 'PARTY_LIVING_COUNT'
+                prefix = 'get_attacker_' if sub_sc == 0x14 else 'get_target_'
+                sc_name = prefix + 'gender' if self.read_int(1) == 1 else prefix + 'party_size'
         elif sc == 0x1D:
             sub_sc = self.read_int(1)
-            sc_name = constants.SC_1D_NAMES.get(sub_sc, 'UNK_1D_{:02X}'.format(sub_sc))
-            line_break = sub_sc in {0x00, 0x01, 0x06, 0x07, 0x08, 0x09, 0x0C, 0x0E, 0x0F, 0x12, 0x13, 0x15, 0x18, 0x21}
+            sc_name = constants.SC_1D_NAMES.get(sub_sc, 'unk_1D_{:02X}'.format(sub_sc))
 
             if sub_sc in {0x19, 0x21, 0x23, 0x24}:
                 args.append(self.read_int(1))
@@ -320,40 +344,40 @@ class ScriptDumper(object):
             elif sub_sc in {0x06, 0x07, 0x14, 0x17}:
                 args.append(self.read_int(4))
             elif sub_sc in {0x0C, 0x10, 0x11, 0x12}:
-                args.append(self.read_chosen_four(replace_00='REG_RESULT'))
+                args.append(self.read_chosen_four(replace_00='result'))
                 args.append(self.read_int(1))
             elif sub_sc == 0x0D:
-                args.append(self.read_chosen_four(replace_00='REG_RESULT'))
+                args.append(self.read_chosen_four(replace_00='result'))
                 args += self.read_status()
             elif sub_sc == 0x0F:
-                args.append(self.read_chosen_four(replace_00='REG_ARGUMENT'))
+                args.append(self.read_chosen_four(replace_00='argument'))
                 args.append(self.read_int(1))
             elif sub_sc == 0x02:
                 type_id = self.read_int(1)
                 item_type = list_get_default(constants.ITEM_TYPES, type_id-1, type_id)
                 args.append(item_type)
             elif sub_sc == 0x13:
-                args.append(self.read_chosen_four(replace_00='REG_RESULT', replace_FF='ANY'))
+                args.append(self.read_chosen_four(replace_00='result', replace_FF='any'))
                 args.append(self.read_int(1))
             elif sub_sc in {0x00, 0x01, 0x05, 0x0E}:
-                args.append(self.read_chosen_four(replace_00='REG_RESULT', replace_FF='ANY'))
+                args.append(self.read_chosen_four(replace_00='result', replace_FF='any'))
                 args.append(self.read_item())
             elif sub_sc in {0x0A, 0x0B, 0x18}:
                 args.append(self.read_item())
             elif sub_sc == 0x03:
-                args.append(self.read_chosen_four(replace_00='REG_ARGUMENT', replace_FF='ANY'))
+                args.append(self.read_chosen_four(replace_00='argument', replace_FF='any'))
             elif sub_sc == 0x04:
-                args.append(self.read_chosen_four(replace_00='REG_RESULT'))
+                args.append(self.read_chosen_four(replace_00='result'))
                 args.append(self.read_item())
         elif sc == 0x1E:
             sub_sc = self.read_int(1)
-            sc_name = constants.SC_1E_NAMES.get(sub_sc, 'UNK_1E_{:02X}'.format(sub_sc))
+            sc_name = constants.SC_1E_NAMES.get(sub_sc, 'unk_1E_{:02X}'.format(sub_sc))
 
             if sub_sc < 0x08:
-                args.append(self.read_chosen_four(replace_00='REG_ARGUMENT', replace_FF='ALL'))
+                args.append(self.read_chosen_four(replace_00='argument', replace_FF='all'))
                 args.append(self.read_int(1))
             elif sub_sc == 0x08:
-                args.append(self.read_chosen_four(replace_00='REG_RESULT'))
+                args.append(self.read_chosen_four(replace_00='result'))
                 args.append(self.read_int(1))
             elif sub_sc == 0x09:
                 args.append(self.read_chosen_four())
@@ -363,33 +387,32 @@ class ScriptDumper(object):
                 args.append(self.read_int(1))
         elif sc == 0x1F:
             sub_sc = self.read_int(1)
-            sc_name = constants.SC_1F_NAMES.get(sub_sc, 'UNK_1F_{:02X}'.format(sub_sc))
-            line_break = sub_sc not in {0x04, 0x18, 0x19, 0x30, 0x31, 0x81, 0xD1}
+            sc_name = constants.SC_1F_NAMES.get(sub_sc, 'unk_1F_{:02X}'.format(sub_sc))
 
             if sub_sc in {0x02, 0x04, 0x07, 0x14, 0x21, 0x52, 0x60, 0x62, 0x67, 0xD0, 0xD2, 0xD3}:
                 args.append(self.read_int(1))
             elif sub_sc in {0x11, 0x12}:
-                args.append(self.read_party_member(replace_00='REG_ARGUMENT'))
+                args.append(self.read_party_member(replace_00='argument'))
             elif sub_sc in {0x1B, 0x23, 0xE6, 0xE7, 0xE9, 0xEA, 0xEE, 0xEF, 0xF4}:
                 args.append(self.read_int(2))
             elif sub_sc in {0x1A, 0xF3}:
                 args.append(self.read_int(2))
                 args.append(self.read_emote())
             elif sub_sc == 0x13:
-                args.append(self.read_party_member(replace_00='REG_RESULT', replace_FF='LEADER'))
+                args.append(self.read_party_member(replace_00='result', replace_FF='leader'))
                 args.append(self.read_int(1))  # Direction
             elif sub_sc == 0x1C:
-                args.append(self.read_party_member(replace_00='REG_RESULT'))
+                args.append(self.read_party_member(replace_00='result'))
                 args.append(self.read_emote())
             elif sub_sc == 0x1D:
-                args.append(self.read_party_member(replace_00='REG_RESULT'))
+                args.append(self.read_party_member(replace_00='result'))
             elif sub_sc in {0x81, 0x83}:
-                args.append(self.read_chosen_four(replace_00='REG_RESULT'))
+                args.append(self.read_chosen_four(replace_00='result'))
                 args.append(self.read_int(1))
             elif sub_sc in {0xE5, 0xE8}:
-                args.append(self.read_party_member(replace_FF='ALL'))
+                args.append(self.read_party_member(replace_FF='all'))
             elif sub_sc in {0xEB, 0xEC}:
-                args.append(self.read_party_member(replace_FF='ALL'))
+                args.append(self.read_party_member(replace_FF='all'))
                 args.append(self.read_int(1))
             elif sub_sc == 0x63:
                 args.append(self.read_address())
@@ -433,18 +456,28 @@ class ScriptDumper(object):
 
         # Whew, that was a lot of checks!
 
-        to_write = '[{}'.format(sc_name)
-        for arg in args:
-            to_write += ' {}'.format(arg)
+        to_write = sc_name
+        if args:
+            to_write += '({})'.format(', '.join(str(arg) for arg in args))
 
-        if sc in {0x02, 0x0A}:  # END or GOTO
-            to_write += ']\n\n'
-        elif line_break:
-            to_write += ']\n'
+        self.should_add_label = sc_name in {'eob', 'end', 'goto'}
+        self.was_linebreak = line_break or self.should_add_label
+
+        if self.inside_string and not self.was_linebreak:
+            to_write = '{' + to_write + '}'
+        elif self.inside_string:
+            self.inside_string = False
+            to_write = '" ' + to_write
         else:
-            to_write += ']'
+            line_break = True
+            self.was_linebreak = True
 
-        self.should_add_label = sc in {0x02, 0x0A}  # END or GOTO
+        if self.should_add_label:
+            to_write += '\n\n'
+            self.was_linebreak = True
+        elif line_break:
+            to_write += '\n'
+
         return to_write
 
     def dump_text_script(self):
@@ -457,22 +490,32 @@ class ScriptDumper(object):
             while self.address < end:
                 snes_addr = self.snes_address
                 if snes_addr in self.symbols:
-                    self.out_file.write('; ${:06X}\n'.format(snes_addr))
+                    self.out_file.write('// ${:06X}\n'.format(snes_addr))
 
                     symbol = self.symbols[snes_addr]
                     if symbol.comment:
-                        self.out_file.write('; {}\n'.format(symbol.comment))
+                        self.out_file.write('// {}\n'.format(symbol.comment))
                     self.out_file.write('{}:\n'.format(symbol.label))
+                    self.was_linebreak = True
 
                 c = self.read_int(1)
+
+                if self.was_linebreak:
+                    self.out_file.write('    ')
+                    self.was_linebreak = False
+
+                if (0x15 <= c <= 0x17 or c >= 0x20) and not self.inside_string:
+                    self.out_file.write('"')
+                    self.inside_string = True
+
                 if c >= 0x20:
                     self.out_file.write(self.translate_chr(c))
                 elif 0x15 <= c <= 0x17 and self.version != RomVersion.JP:
                     dict_base = (c - 0x15) * 256
                     self.out_file.write(self.dictionary[dict_base + self.read_int(1)])
                 else:
-                    script_code_string = self.get_script_code_string(c)
-                    self.out_file.write(script_code_string)
+                    to_write = self.get_script_code_string(c)
+                    self.out_file.write(to_write)
 
 
 def pc_to_snes(addr):
